@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -14,11 +14,12 @@ const allowedNext: Record<string, string[]> = {
 };
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  context: { params: any }
 ) {
   try {
-    const { id } = await params;
+    const params = await Promise.resolve(context.params);
+    const { id } = params as { id: string };
     const body = (await req.json().catch(() => ({}))) as { status?: string };
     const nextStatus = body.status;
 
