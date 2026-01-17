@@ -62,9 +62,9 @@ export default function RideTrackingPage() {
   async function load() {
     if (!id) return;
     try {
-      setErr(null);
       const data = await getRide(id);
       setRide(data);
+      setErr(null);
     } catch (e: any) {
       setErr(e?.message ?? "Ride not found");
     } finally {
@@ -76,7 +76,6 @@ export default function RideTrackingPage() {
     load();
     const t = setInterval(load, 2000);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const idx = useMemo(() => (ride ? statusIndex(ride.status) : -1), [ride]);
@@ -165,7 +164,8 @@ export default function RideTrackingPage() {
 
                 <span
                   className={
-                    "rounded-full px-4 py-2 text-sm font-extrabold " + pill(ride.status)
+                    "rounded-full px-4 py-2 text-sm font-extrabold " +
+                    pill(ride.status)
                   }
                 >
                   {labelOf(ride.status)}
@@ -217,7 +217,7 @@ export default function RideTrackingPage() {
                 <div className="mt-5 space-y-3">
                   {steps.map((s, i) => {
                     const done = idx >= i;
-                    const active = idx === i;
+                    const activeStep = idx === i;
                     return (
                       <div key={s.key} className="flex items-start gap-3">
                         <div className="pt-0.5">
@@ -238,12 +238,12 @@ export default function RideTrackingPage() {
                             <p
                               className={
                                 "font-extrabold " +
-                                (active ? "text-slate-900" : "text-slate-700")
+                                (activeStep ? "text-slate-900" : "text-slate-700")
                               }
                             >
                               {s.label}
                             </p>
-                            {active ? (
+                            {activeStep ? (
                               <span className="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
                                 Current
                               </span>

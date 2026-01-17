@@ -29,7 +29,9 @@ async function readJsonOrThrow(res: Response) {
   if (!res.ok) {
     // If server returned HTML error page, show a clean message
     if (contentType.includes("text/html")) {
-      throw new Error(`Request failed (${res.status}). API route not found or crashed.`);
+      throw new Error(
+        `Request failed (${res.status}). API route not found or crashed.`
+      );
     }
     try {
       const data = JSON.parse(text);
@@ -84,6 +86,8 @@ export async function getRide(id: string) {
 
 /**
  * Update ride status (Driver)
+ * Use this for status transitions AFTER accept:
+ * ARRIVING -> IN_PROGRESS -> COMPLETED, etc.
  */
 export async function updateRide(
   id: string,
@@ -93,6 +97,37 @@ export async function updateRide(
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
+  });
+
+  return (await readJsonOrThrow(res)) as Ride;
+}
+
+/**
+ * Atomic accept (Driver)
+ * PATCH /api/rides/:id/accept
+ */
+export async function acceptRide(id: string, driverName: string) {
+  const res = await fetch(`/api/rides/${id}/accept`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ driverName }),
+  });
+
+  return (await readJsonOrThrow(res)) as Ride;
+}
+export async function setRideStatus(id: string, status: RideStatus) {
+  const res = await fetch(`/api/rides/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
+  return (await (await import("./api")).readJsonOrThrow?.(res)) as Ride; // if you can't import, just call readJsonOrThrow directly
+}
+export async function setRideStatus(id: string, status: RideStatus) {
+  const res = await fetch(`/api/rides/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
   });
 
   return (await readJsonOrThrow(res)) as Ride;
