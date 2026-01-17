@@ -42,7 +42,7 @@ export async function PATCH(
 
     const updated = await prisma.ride.update({
       where: { id },
-      data: { status: nextStatus },
+      data: { status: nextStatus as any },
     });
 
     return NextResponse.json(updated);
