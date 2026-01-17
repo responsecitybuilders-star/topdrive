@@ -15,9 +15,10 @@ const allowedNext: Record<string, string[]> = {
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = (await req.json().catch(() => ({}))) as { status?: string };
     const nextStatus = body.status;
 
@@ -25,7 +26,7 @@ export async function PATCH(
       return NextResponse.json({ error: "status is required" }, { status: 400 });
     }
 
-    const ride = await prisma.ride.findUnique({ where: { id: params.id } });
+    const ride = await prisma.ride.findUnique({ where: { id } });
     if (!ride) {
       return NextResponse.json({ error: "Ride not found" }, { status: 404 });
     }
@@ -39,7 +40,7 @@ export async function PATCH(
     }
 
     const updated = await prisma.ride.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: nextStatus },
     });
 

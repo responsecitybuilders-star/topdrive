@@ -5,9 +5,10 @@ export const runtime = "nodejs";
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { driverName } = (await req.json().catch(() => ({}))) as {
       driverName?: string;
     };
@@ -21,14 +22,14 @@ export async function PATCH(
 
     // Atomic: only update if it's still REQUESTED
     const updated = await prisma.ride.updateMany({
-      where: { id: params.id, status: "REQUESTED" },
+      where: { id, status: "REQUESTED" },
       data: { status: "ACCEPTED", driverName },
     });
 
     if (updated.count === 0) {
       // Distinguish NOT FOUND vs ALREADY ACCEPTED
       const exists = await prisma.ride.findUnique({
-        where: { id: params.id },
+        where: { id },
         select: { id: true, status: true },
       });
 
@@ -43,7 +44,7 @@ export async function PATCH(
     }
 
     // Return the updated ride
-    const ride = await prisma.ride.findUnique({ where: { id: params.id } });
+    const ride = await prisma.ride.findUnique({ where: { id } });
     return NextResponse.json(ride);
   } catch (e) {
     console.error("PATCH /api/rides/[id]/accept crashed:", e);
